@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <random>
+#include <iomanip>
 #include <set>
 
 using namespace std;
@@ -82,16 +83,17 @@ void ModifyCompressedFile(const std::string& filename) {
 
   // Modify bits and write changes to txt file
   std::fstream txt_file("modified_bits.txt", std::ios::out);
+  txt_file << std::hex << std::uppercase << std::setfill('0'); // 设置输出格式
   for (int pos : modified_positions) {
-    char original_value;
+    std::uint8_t original_value;
     file.seekg(pos);
-    file.read(&original_value, 1);
+    file.read(reinterpret_cast<char*>(&original_value), 1);
 
-    const char new_value = 0xF;
+    std::uint8_t new_value = 0xFF;
     file.seekp(pos);
-    file.write(&new_value, 1);
+    file.write(reinterpret_cast<const char*>(&new_value), 1);
 
-    txt_file << pos << ": " << original_value << std::endl;
+    txt_file << pos << " " << std::setw(2) << static_cast<unsigned int>(original_value) << std::endl;
   }
 
   file.close();
