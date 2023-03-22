@@ -1,6 +1,14 @@
 #include <windows.h>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+#include <random>
+#include <set>
+
+using namespace std;
 
 bool CompressWith7zip(std::vector<std::string> filenames, std::string password)
 {
@@ -47,6 +55,50 @@ bool CompressWith7zip(std::vector<std::string> filenames, std::string password)
     return true;
 }
 
+void ModifyCompressedFile(const std::string& filename) {
+  std::fstream file(filename, std::ios::in | std::ios::out | std::ios::binary);
+  if (!file.is_open()) {
+    std::cout << "Failed to open file " << filename << std::endl;
+    return;
+  }
+
+  // Get file size
+  file.seekg(0, std::ios::end);
+  const std::streamoff file_size = file.tellg();
+  file.seekg(0, std::ios::beg);
+
+  // Generate random number of bits to modify
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dist(10, 30);
+  const int num_bits_to_modify = dist(gen);
+
+  // Generate random bit positions to modify
+  std::uniform_int_distribution<> pos_dist(0, file_size - 1);
+  std::set<int> modified_positions;
+  while (modified_positions.size() < num_bits_to_modify) {
+    modified_positions.insert(pos_dist(gen));
+  }
+
+  // Modify bits and write changes to txt file
+  std::fstream txt_file("modified_bits.txt", std::ios::out);
+  for (int pos : modified_positions) {
+    char original_value;
+    file.seekg(pos);
+    file.read(&original_value, 1);
+
+    const char new_value = 0xF;
+    file.seekp(pos);
+    file.write(&new_value, 1);
+
+    txt_file << pos << ": " << original_value << std::endl;
+  }
+
+  file.close();
+  txt_file.close();
+}
+
+
 int main(int argc, char* argv[])
 {
     // 检查参数数量
@@ -70,13 +122,13 @@ int main(int argc, char* argv[])
 
     // 调用CompressWith7zip函数进行压缩
     if (CompressWith7zip(filenames, password))
-    {
         std::cout << "Compression successful." << std::endl;
-        return 0;
-    }
     else
     {
         std::cerr << "Compression failed." << std::endl;
         return 1;
     }
+
+    ModifyCompressedFile("archive.7z");
+    return 0;
 }
