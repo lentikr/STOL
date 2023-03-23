@@ -1,6 +1,10 @@
 # STOL(*S*afe *T*ransfer *O*n*L*ine)
 
-This is a program for securely transferring files over the internet. This program was written almost entirely by ChatGPT.
+<p align="center">
+<a href="README_zh_CN.md">中文</a>
+</p>
+
+This is a program for securely transferring files over the internet. This program was written almost entirely by ChatGPT. And this README file is written by New Bing.
 The folder "process" contains a general description of how I communicated with ChatGPT and New Bing.
 
 ## Pre-Send Processing
